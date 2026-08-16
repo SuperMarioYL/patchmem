@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "patchmem",
+  "github": "https://github.com/SuperMarioYL/patchmem",
+  "host": "patchmem.lei6393.com",
+  "lang": { "primary": "zh", "toggle": true },
+  "accent": ["#c8962e"],
+  "hero": {
+    "eyebrow": {
+      "zh": "跑偏了别重启 · 改记忆 · 看决策 diff",
+      "en": "Don't restart · Patch memory · See the diff"
+    },
+    "headline": {
+      "zh": "给跑偏的 coding agent\n打个记忆补丁",
+      "en": "Patch a derailed agent's\nmemory, see the diff"
+    },
+    "sub": {
+      "zh": "在决策树里找到锚点,写一段修正;before/after 决策 diff 机械可核验,不是模型讲故事。",
+      "en": "Find an anchor in the decision tree, write a correction; the before/after decision diff is mechanical and checkable, never a model's story."
+    },
+    "command": "patchmem view <session>",
+    "cta": { "zh": "开始使用", "en": "Get started" },
+    "ctaGithub": { "zh": "在 GitHub 查看", "en": "View on GitHub" },
+    "scroll": { "zh": "下拉了解更多", "en": "Scroll to explore" }
+  },
+  "advantages": [
+    {
+      "title": { "zh": "看见 agent 此刻记着什么", "en": "See what the agent remembers right now" },
+      "body": {
+        "zh": "一条命令把整条会话渲染成决策树加当前工作记忆——agent 在哪个分叉做了什么、此刻脑子里装着什么,一眼看清,只读无副作用。",
+        "en": "One command renders the whole session as a decision tree plus the current working memory — where the agent branched and what it holds in its head right now, all in view. Read-only, no side effects."
+      },
+      "chips": ["› 决策树 + 工作记忆", "› 只读 · 无副作用"]
+    },
+    {
+      "title": { "zh": "在任一锚点写一段修正", "en": "Write a correction at any anchor" },
+      "body": {
+        "zh": "打开编辑器,在决策树任一锚点插入一段修正的 plan;锚点写入前先核验,补丁文件随你带走,不绑死在一台机器上。",
+        "en": "Open your editor, insert a corrected plan at any anchor in the decision tree; the anchor is verified before it lands, and the patch file travels with you instead of being locked to one machine."
+      },
+      "chips": ["› 锚点写入前核验", "› 补丁文件随你带走"]
+    },
+    {
+      "title": { "zh": "决策 diff 是机械对齐,不是模型讲故事", "en": "The decision diff is mechanical, not a model's story" },
+      "body": {
+        "zh": "before/after 的 agent 决策逐条对齐,只报真正变了的那些,绝不编一句“因为你的补丁所以改变”;测试守住这条底线,谁也别让它退化成黑箱归因。",
+        "en": "Before/after agent decisions are paired one-to-one; only what truly changed gets reported, and no ‘this changed because of your patch’ narrative is ever invented. Tests hold this line so it never collapses into black-box attribution."
+      },
+      "chips": ["› before/after 逐条对齐", "› 测试守住不退化"]
+    },
+    {
+      "title": { "zh": "本地跑 · 你的会话不出机器", "en": "Runs locally · your sessions never leave the machine" },
+      "body": {
+        "zh": "读你自己机器上的会话文件,不上云、不注册账号、不外发。MIT 开源,装上即用,跑偏的长 run 不必再赌一把重启。",
+        "en": "Reads the session files already on your own machine — no cloud, no account, nothing sent out. MIT open source; install and go, and a derailed long run no longer means gambling on a restart."
+      },
+      "chips": ["› MIT · 开源", "› 本地 · 零账号"]
+    }
+  ],
+  "scene": { "kind": "mesh" },
+  "cta": {
+    "headline": { "zh": "跑偏了别重启,打个补丁", "en": "Patch it, don't restart" },
+    "sub": {
+      "zh": "开源、MIT、本地跑。看见 agent 的记忆,在锚点写一段修正,decision diff 机械可核验。",
+      "en": "Open source, MIT, runs locally. See the agent's memory, write a correction at an anchor, and a mechanical, checkable decision diff."
+    },
+    "button": { "zh": "在 GitHub 上看", "en": "See it on GitHub" }
+  },
+  "footer": {
+    "tag": {
+      "zh": "MIT · 本地优先 · 给 coding agent 的记忆补丁,不是重启",
+      "en": "MIT · local-first · a memory patch for coding agents, not a restart"
+    }
+  }
+}
