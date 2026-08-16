@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "patchmem"
+version = "0.1.0"
+description = "Patch-as-commit-to-working-memory primitive: pause a coding-agent run, edit the live working memory, resume, and surface a machine-checkable patch-influence-diff."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "SuperMarioYL" }]
+keywords = ["coding-agent", "agent", "claude-code", "working-memory", "decision-diff", "replay-ablation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "typer>=0.12",
+    "rich>=13.7",
+    "pydantic>=2.7",
+]
+
+[project.scripts]
+patchmem = "patchmem.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/SuperMarioYL/patchmem"
+Repository = "https://github.com/SuperMarioYL/patchmem"
+Issues = "https://github.com/SuperMarioYL/patchmem/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["patchmem"]
+
+[tool.hatch.build.targets.sdist]
+include = ["patchmem", "tests", "assets", "docs", "examples", "README.md", "README.en.md", "LICENSE", "VERSION", "pyproject.toml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+build/
+dist/
+.eggs/
+*.whl
+
+# virtualenvs / local envs
+.venv/
+venv/
+env/
+
+# test / coverage caches
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# editor scratch
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# build scratch & local config
+PUBLISH_BLOCKED.md
+BUILD_SETUP_NEXT_STEPS.md
+.spawn.*
+.builder_*
+.build_metadata*
+.stage_*
+_build_ctx.json
+
+# demo render scratch (the committed gif lives in assets/)
+demo-patch.md
+
+# agent scratch (never ship)
+.claude/
+CLAUDE.md
+
+# demo render artifact (committed when CI renders; ignore local re-renders)
+# assets/demo.gif is tracked intentionally — uncomment to ignore local-only renders.
