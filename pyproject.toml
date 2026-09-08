@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "patchmem"
 version = "0.1.0"
-description = "Patch-as-commit-to-working-memory primitive: pause a coding-agent run, edit the live working memory, resume, and surface a machine-checkable patch-influence-diff."
+description = "Inspect coding-agent transcripts, author anchored memory patches, and structurally diff supplied tool-decision lists."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"

@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "source_revision": "e1c9ee76246c462ba2cbafa7bf7de332aa7339e5",
+  "scope": "Structural diff of two explicit synthetic decision lists, one altered tool and one added tool. No resumed agent, replay ablation or causal effect is measured.",
+  "steps": [
+    {
+      "label": "Recorded run",
+      "body": "Structural diff of two explicit synthetic decision lists, one altered tool and one added tool. No resumed agent, replay ablation or causal effect is measured.",
+      "command": ".venv/bin/python examples/presentation-demo.py",
+      "output": "[\n  {\n    \"kind\": \"altered\",\n    \"id\": \"tool-1\",\n    \"before\": {\n      \"id\": \"tool-1\",\n      \"name\": \"Read\",\n      \"input\": {\n        \"path\": \"old.yaml\"\n      }\n    },\n    \"after\": {\n      \"id\": \"tool-1\",\n      \"name\": \"Read\",\n      \"input\": {\n        \"path\": \"new.yaml\"\n      }\n    }\n  },\n  {\n    \"kind\": \"added\",\n    \"id\": \"tool-2\",\n    \"after\": {\n      \"id\": \"tool-2\",\n      \"name\": \"Read\",\n      \"input\": {\n        \"path\": \"policy.yaml\"\n      }\n    }\n  }\n]"
+    }
+  ]
+}

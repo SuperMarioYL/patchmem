@@ -1,75 +1,215 @@
 {
-  "schema": 1,
+  "schema": 3,
   "name": "patchmem",
   "github": "https://github.com/SuperMarioYL/patchmem",
   "host": "patchmem.lei6393.com",
-  "lang": { "primary": "zh", "toggle": true },
-  "accent": ["#c8962e"],
+  "palette": "auto",
+  "lang": {
+    "primary": "en",
+    "toggle": true
+  },
+  "meta": {
+    "visual_style": "neon-particle",
+    "demo_source": "docs/demo-results.json"
+  },
   "hero": {
-    "eyebrow": {
-      "zh": "跑偏了别重启 · 改记忆 · 看决策 diff",
-      "en": "Don't restart · Patch memory · See the diff"
-    },
     "headline": {
-      "zh": "给跑偏的 coding agent\n打个记忆补丁",
-      "en": "Patch a derailed agent's\nmemory, see the diff"
+      "en": "Compare tool decisions around a memory patch.",
+      "zh": "比较记忆补丁前后的工具决策。"
     },
     "sub": {
-      "zh": "在决策树里找到锚点,写一段修正;before/after 决策 diff 机械可核验,不是模型讲故事。",
-      "en": "Find an anchor in the decision tree, write a correction; the before/after decision diff is mechanical and checkable, never a model's story."
+      "en": "PatchMem reads structured agent transcripts, helps author anchored text patches, and compares supplied tool-use decisions by ID, name and arguments.",
+      "zh": "PatchMem 读取结构化 Agent 轨迹，帮助编写带锚点的文本补丁，并按 ID、名称和参数比较提供的工具决策。"
     },
-    "command": "patchmem view <session>",
-    "cta": { "zh": "开始使用", "en": "Get started" },
-    "ctaGithub": { "zh": "在 GitHub 查看", "en": "View on GitHub" },
-    "scroll": { "zh": "下拉了解更多", "en": "Scroll to explore" }
+    "href": "#quickstart"
   },
   "advantages": [
     {
-      "title": { "zh": "看见 agent 此刻记着什么", "en": "See what the agent remembers right now" },
-      "body": {
-        "zh": "一条命令把整条会话渲染成决策树加当前工作记忆——agent 在哪个分叉做了什么、此刻脑子里装着什么,一眼看清,只读无副作用。",
-        "en": "One command renders the whole session as a decision tree plus the current working memory — where the agent branched and what it holds in its head right now, all in view. Read-only, no side effects."
+      "title": {
+        "en": "Anchored edits",
+        "zh": "带锚点编辑"
       },
-      "chips": ["› 决策树 + 工作记忆", "› 只读 · 无副作用"]
+      "body": {
+        "en": "A patch names the transcript message and inserted text.",
+        "zh": "补丁明确消息锚点与插入文本。"
+      }
     },
     {
-      "title": { "zh": "在任一锚点写一段修正", "en": "Write a correction at any anchor" },
-      "body": {
-        "zh": "打开编辑器,在决策树任一锚点插入一段修正的 plan;锚点写入前先核验,补丁文件随你带走,不绑死在一台机器上。",
-        "en": "Open your editor, insert a corrected plan at any anchor in the decision tree; the anchor is verified before it lands, and the patch file travels with you instead of being locked to one machine."
+      "title": {
+        "en": "Structural evidence",
+        "zh": "结构证据"
       },
-      "chips": ["› 锚点写入前核验", "› 补丁文件随你带走"]
+      "body": {
+        "en": "Changes retain the actual before and after tool inputs.",
+        "zh": "变化保留实际前后工具输入。"
+      }
     },
     {
-      "title": { "zh": "决策 diff 是机械对齐,不是模型讲故事", "en": "The decision diff is mechanical, not a model's story" },
-      "body": {
-        "zh": "before/after 的 agent 决策逐条对齐,只报真正变了的那些,绝不编一句“因为你的补丁所以改变”;测试守住这条底线,谁也别让它退化成黑箱归因。",
-        "en": "Before/after agent decisions are paired one-to-one; only what truly changed gets reported, and no ‘this changed because of your patch’ narrative is ever invented. Tests hold this line so it never collapses into black-box attribution."
+      "title": {
+        "en": "Local inspection",
+        "zh": "本地检查"
       },
-      "chips": ["› before/after 逐条对齐", "› 测试守住不退化"]
-    },
-    {
-      "title": { "zh": "本地跑 · 你的会话不出机器", "en": "Runs locally · your sessions never leave the machine" },
       "body": {
-        "zh": "读你自己机器上的会话文件,不上云、不注册账号、不外发。MIT 开源,装上即用,跑偏的长 run 不必再赌一把重启。",
-        "en": "Reads the session files already on your own machine — no cloud, no account, nothing sent out. MIT open source; install and go, and a derailed long run no longer means gambling on a restart."
-      },
-      "chips": ["› MIT · 开源", "› 本地 · 零账号"]
+        "en": "View and diff can use saved data without a model.",
+        "zh": "view 与 diff 可使用保存数据，无需模型。"
+      }
     }
   ],
-  "scene": { "kind": "mesh" },
-  "cta": {
-    "headline": { "zh": "跑偏了别重启,打个补丁", "en": "Patch it, don't restart" },
-    "sub": {
-      "zh": "开源、MIT、本地跑。看见 agent 的记忆,在锚点写一段修正,decision diff 机械可核验。",
-      "en": "Open source, MIT, runs locally. See the agent's memory, write a correction at an anchor, and a mechanical, checkable decision diff."
+  "demo": {
+    "title": {
+      "en": "Run it on a complete example",
+      "zh": "运行完整示例"
     },
-    "button": { "zh": "在 GitHub 上看", "en": "See it on GitHub" }
+    "note": {
+      "en": "Run the explicit synthetic before/after decision lists in examples/presentation-demo.py through the production compute_diff function.",
+      "zh": "将 examples/presentation-demo.py 中明确给出的合成前后决策列表交给生产 compute_diff 函数。"
+    },
+    "source": "https://github.com/SuperMarioYL/patchmem/blob/main/docs/demo-results.json",
+    "steps": [
+      {
+        "label": "Recorded run",
+        "body": "Structural diff of two explicit synthetic decision lists, one altered tool and one added tool. No resumed agent, replay ablation or causal effect is measured.",
+        "command": ".venv/bin/python examples/presentation-demo.py",
+        "output": "[\n  {\n    \"kind\": \"altered\",\n    \"id\": \"tool-1\",\n    \"before\": {\n      \"id\": \"tool-1\",\n      \"name\": \"Read\",\n      \"input\": {\n        \"path\": \"old.yaml\"\n      }\n    },\n    \"after\": {\n      \"id\": \"tool-1\",\n      \"name\": \"Read\",\n      \"input\": {\n        \"path\": \"new.yaml\"\n      }\n    }\n  },\n  {\n    \"kind\": \"added\",\n    \"id\": \"tool-2\",\n    \"after\": {\n      \"id\": \"tool-2\",\n      \"name\": \"Read\",\n      \"input\": {\n        \"path\": \"policy.yaml\"\n      }\n    }\n  }\n]",
+        "image": "/assets/presentation/demo-0-light.svg",
+        "imageDark": "/assets/presentation/demo-0-dark.svg"
+      }
+    ]
   },
-  "footer": {
-    "tag": {
-      "zh": "MIT · 本地优先 · 给 coding agent 的记忆补丁,不是重启",
-      "en": "MIT · local-first · a memory patch for coding agents, not a restart"
+  "quickstart": {
+    "title": {
+      "en": "Try it locally",
+      "zh": "本地上手"
+    },
+    "body": {
+      "en": "Run the explicit synthetic before/after decision lists in examples/presentation-demo.py through the production compute_diff function.",
+      "zh": "将 examples/presentation-demo.py 中明确给出的合成前后决策列表交给生产 compute_diff 函数。"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Install from source",
+          "zh": "从源码安装"
+        },
+        "code": "git clone https://github.com/SuperMarioYL/patchmem.git\ncd patchmem\nuv venv .venv\nuv pip install --python .venv/bin/python -e .\nsource .venv/bin/activate"
+      },
+      {
+        "title": {
+          "en": "Run the included example",
+          "zh": "运行随仓示例"
+        },
+        "code": ".venv/bin/python examples/presentation-demo.py"
+      }
+    ]
+  },
+  "limitations": [
+    {
+      "en": "resume and hosted replay are stubs. The current tool does not execute patched and control agent runs.",
+      "zh": "resume 与托管回放仍是占位；当前工具不执行带补丁和对照的 Agent 运行。"
+    },
+    {
+      "en": "The offline demo compares synthetic lists. Structural differences alone do not prove a patch caused a decision.",
+      "zh": "离线示例比较合成列表；结构差异本身不证明补丁导致了决策变化。"
+    },
+    {
+      "en": "Decision matching uses tool_use IDs, so meaningful comparisons require identifiers with a suitable correspondence.",
+      "zh": "决策按 tool_use ID 匹配，因此有效比较需要标识之间具备适当对应关系。"
     }
+  ],
+  "scene": {
+    "kind": "neon-graph",
+    "fallback": "/assets/presentation/scene-dark.svg",
+    "fallbackLight": "/assets/presentation/scene-light.svg"
+  },
+  "story": {
+    "intro": {
+      "title": {
+        "en": "A concrete task",
+        "zh": "从实际任务出发"
+      },
+      "body": {
+        "en": "A plan correction should have an inspectable location and an explicit difference report. PatchMem provides those local data structures without replacing a structural comparison with a model-written explanation.",
+        "zh": "计划修正需要可检查的插入位置与明确差异报告。PatchMem 提供本地数据结构，通过结构比较展示差异，不依赖模型事后解释。"
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "en": "Follow the operation",
+          "zh": "处理过程"
+        },
+        "body": {
+          "en": "The transcript parser follows parentUuid relationships and extracts working-memory text and tool_use decisions. A Patch records the anchor and inserted text. compute_diff indexes decisions by tool ID and reports added, removed or altered calls. The resume runner currently raises RunnerStub.",
+          "zh": "轨迹解析器读取 parentUuid 关系，提取工作记忆文本与 tool_use 决策。Patch 保存锚点和插入文本；compute_diff 按工具 ID 建索引，报告新增、删除或修改。当前 resume 运行器会抛出 RunnerStub。"
+        },
+        "image": {
+          "light": "/assets/presentation/process-light.svg",
+          "dark": "/assets/presentation/process-dark.svg",
+          "alt": {
+            "en": "Follow the operation",
+            "zh": "处理过程"
+          }
+        }
+      },
+      {
+        "title": {
+          "en": "How PatchMem works",
+          "zh": "PatchMem 的工作方式"
+        },
+        "body": {
+          "en": "The transcript parser follows parentUuid relationships and extracts working-memory text and tool_use decisions. A Patch records the anchor and inserted text. compute_diff indexes decisions by tool ID and reports added, removed or altered calls. The resume runner currently raises RunnerStub.",
+          "zh": "轨迹解析器读取 parentUuid 关系，提取工作记忆文本与 tool_use 决策。Patch 保存锚点和插入文本；compute_diff 按工具 ID 建索引，报告新增、删除或修改。当前 resume 运行器会抛出 RunnerStub。"
+        },
+        "image": {
+          "light": "/assets/presentation/architecture-light.svg",
+          "dark": "/assets/presentation/architecture-dark.svg",
+          "alt": {
+            "en": "How PatchMem works",
+            "zh": "PatchMem 的工作方式"
+          }
+        }
+      },
+      {
+        "title": {
+          "en": "Connect the pieces",
+          "zh": "输入与输出"
+        },
+        "body": {
+          "en": "The following routes are implemented in the source. Choose the input that matches your task and keep the resulting artifact with your project.",
+          "zh": "以下路径已有源码实现。按任务选择输入，并把生成的结果与项目一起保存。"
+        },
+        "image": {
+          "light": "/assets/presentation/integrations-light.svg",
+          "dark": "/assets/presentation/integrations-dark.svg",
+          "alt": {
+            "en": "Connect the pieces",
+            "zh": "输入与输出"
+          }
+        }
+      }
+    ],
+    "details": [
+      {
+        "title": {
+          "en": "Configuration",
+          "zh": "配置"
+        },
+        "body": {
+          "en": "PATCHMEM_PROJECTS_DIR selects transcript discovery, PATCHMEM_RUNS_DIR selects existing comparison outputs, and $EDITOR controls interactive patch authoring. Runtime and hosted settings describe future replay adapters; they do not enable an implemented replay service.",
+          "zh": "PATCHMEM_PROJECTS_DIR 指定轨迹查找目录，PATCHMEM_RUNS_DIR 指定已有比较结果目录，$EDITOR 控制交互式补丁编辑。runtime 与 hosted 设置描述未来回放适配器，不代表已有回放服务。"
+        }
+      },
+      {
+        "title": {
+          "en": "Further use",
+          "zh": "进一步使用"
+        },
+        "body": {
+          "en": "The CLI exposes the following operations. Commands after the example use your own paths or identifiers.",
+          "zh": "CLI 提供以下操作。示例之外的命令需要替换成你的文件路径或标识。"
+        },
+        "code": "patchmem view tests/fixtures/sample_session.jsonl\n# Interactive authoring opens your editor:\npatchmem edit tests/fixtures/sample_session.jsonl --anchor msg-0006 --out patch.md"
+      }
+    ]
   }
 }

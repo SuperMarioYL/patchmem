@@ -1,0 +1,78 @@
+{
+  "name": "patchmem",
+  "tagline": "Compare tool decisions around a memory patch.",
+  "architecture": {
+    "title": "How PatchMem works",
+    "nodes": [
+      {
+        "title": "Transcript parser",
+        "detail": "patchmem/transcript.py"
+      },
+      {
+        "title": "Anchored patch",
+        "detail": "patchmem/patch.py"
+      },
+      {
+        "title": "Decision diff",
+        "detail": "patchmem/influence_diff.py"
+      },
+      {
+        "title": "Tree / report",
+        "detail": "patchmem/wm_view.py"
+      }
+    ],
+    "edges": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ]
+  },
+  "process": {
+    "title": "From input to a useful result",
+    "steps": [
+      {
+        "title": "Define patch",
+        "detail": "Anchor and text"
+      },
+      {
+        "title": "Compare decision IDs",
+        "detail": "Name and argument equality"
+      },
+      {
+        "title": "Report changes",
+        "detail": "One altered, one added"
+      }
+    ],
+    "result": "The demo reports one altered Read decision and one added Read decision without executing either tool."
+  },
+  "integrations": {
+    "title": "Supported input and output routes",
+    "items": [
+      {
+        "title": "Claude JSONL",
+        "detail": "Recorded messages and tool_use blocks"
+      },
+      {
+        "title": "patch.md",
+        "detail": "Anchor, rationale and text"
+      },
+      {
+        "title": "Decision lists",
+        "detail": "Explicit control/patched inputs"
+      },
+      {
+        "title": "InfluenceDiff",
+        "detail": "Added / removed / altered records"
+      }
+    ]
+  }
+}
