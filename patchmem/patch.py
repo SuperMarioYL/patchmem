@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import os
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -156,7 +157,14 @@ def verify_anchor(anchor_uuid: str, messages: list[Message]) -> None:
 
 
 def open_editor(initial: str) -> str:
-    """Spawn ``$EDITOR`` on a temp file, return the saved contents."""
+    """Spawn ``$EDITOR`` on a temp file, return the saved contents.
+
+    The editor may carry flags (``code --wait``, ``vim -f``, …), so the
+    command is split with ``shlex.split`` — passing the whole string as one
+    argv element would make any flagged editor unlaunchable. An editor that
+    cannot be spawned or exits non-zero raises ``PatchError`` so the CLI
+    reports a clean one-line error instead of a traceback.
+    """
     editor = _default_editor()
     with tempfile.NamedTemporaryFile(
         "w", suffix=".patch.md", delete=False, encoding="utf-8"
@@ -164,7 +172,19 @@ def open_editor(initial: str) -> str:
         fh.write(initial)
         path = fh.name
     try:
-        subprocess.run([editor, path], check=True)
+        try:
+            argv = shlex.split(editor) + [path]
+        except ValueError as exc:
+            raise PatchError(f"could not parse editor {editor!r}: {exc}") from exc
+        try:
+            subprocess.run(argv, check=True)
+        except OSError as exc:
+            raise PatchError(f"could not launch editor {editor!r}: {exc}") from exc
+        except subprocess.CalledProcessError as exc:
+            raise PatchError(
+                f"editor {editor!r} exited with status {exc.returncode} — "
+                "patch not saved."
+            ) from exc
         with open(path, "r", encoding="utf-8") as fh:
             return fh.read()
     finally:
