@@ -62,8 +62,10 @@ def test_cli_dash_version_reports_expected():
 # The console script installed alongside the interpreter running the tests
 # (CI does `pip install -e .` before pytest, landing `patchmem` in the same
 # bin dir as python). Resolving via PATH instead would pick up unrelated
-# stale installs on developer machines.
-_CONSOLE_SCRIPT = Path(sys.executable).resolve().parent / "patchmem"
+# stale installs on developer machines. NOTE: absolute(), not resolve() —
+# sys.executable is typically a symlink into the active venv and resolving
+# it escapes to the base interpreter's bin dir.
+_CONSOLE_SCRIPT = Path(sys.executable).absolute().parent / "patchmem"
 
 
 @skipUnless(_CONSOLE_SCRIPT.exists(), "patchmem console script not installed in this environment")
