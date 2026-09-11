@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "patchmem"
-version = "0.1.0"
+version = "0.2.0"
 description = "Inspect coding-agent transcripts, author anchored memory patches, and structurally diff supplied tool-decision lists."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -40,7 +40,7 @@ Issues = "https://github.com/SuperMarioYL/patchmem/issues"
 packages = ["patchmem"]
 
 [tool.hatch.build.targets.sdist]
-include = ["patchmem", "tests", "assets", "docs", "examples", "README.md", "README.en.md", "LICENSE", "VERSION", "pyproject.toml"]
+include = ["patchmem", "tests", "assets", "docs", "examples", "README.md", "README.en.md", "CHANGELOG.md", "LICENSE", "VERSION", "pyproject.toml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
