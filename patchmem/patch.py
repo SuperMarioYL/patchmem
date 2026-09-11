@@ -81,7 +81,8 @@ def prefill_buffer(messages: list[Message], anchor_hint: str | None = None) -> s
         "# Fill anchor_uuid (a real message uuid from `patchmem view`).\n"
         "# Add a one-line rationale (audit note).\n"
         "# Write your new scratchpad / plan content between '--- patch ---'\n"
-        "# and '--- end ---'. Lines starting with '#' are ignored.\n"
+        "# and '--- end ---'. Everything between those markers is kept\n"
+        "# VERBATIM — markdown headings included.\n"
         "#\n"
         f"# valid anchor count in this session: {len(valid)}\n"
         f"# suggested anchor: {suggestion}\n"
@@ -129,9 +130,11 @@ def parse_buffer(buf: str) -> ParsedPatchBuffer:
         elif key == PATCH_RATIONALE:
             rationale = val
 
-    block_text = "\n".join(
-        ln for ln in body.splitlines() if not ln.lstrip().startswith("#")
-    ).strip()
+    # The authored body is kept VERBATIM. The '#' comment convention only
+    # applies to the prefill scaffold, which lives entirely OUTSIDE the
+    # patch/end markers — stripping '#' lines inside the body would silently
+    # delete legitimate markdown from the operator's working-memory payload.
+    block_text = body.strip()
 
     if not anchor:
         raise PatchError("anchor_uuid is empty — set it to a real message uuid.")
