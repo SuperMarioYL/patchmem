@@ -41,6 +41,21 @@ def _inputs_equal(a: dict, b: dict) -> bool:
     return _normalise_input(a) == _normalise_input(b)
 
 
+def changed_input_keys(before: ToolUse, after: ToolUse) -> list[str]:
+    """Input keys whose normalised values differ between two decisions.
+
+    Companion to the altered-detection comparison in ``compute_diff``: the
+    renderer uses it to show exactly WHICH arguments changed. Key order is
+    before-order then new-in-after order — stable for rendering.
+    """
+    keys = list(dict.fromkeys([*before.input, *after.input]))
+    return [
+        k
+        for k in keys
+        if _normalise_input(before.input.get(k)) != _normalise_input(after.input.get(k))
+    ]
+
+
 def compute_diff(
     patch: Patch,
     control_decisions: list[ToolUse],
