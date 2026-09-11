@@ -54,6 +54,7 @@ def test_cli_dash_version_reports_expected():
         capture_output=True,
         text=True,
         timeout=60,
+        check=False,
     )
     assert result.returncode == 0
     assert EXPECTED in result.stdout
@@ -75,6 +76,7 @@ def test_console_script_dash_version_reports_expected():
         capture_output=True,
         text=True,
         timeout=60,
+        check=False,
     )
     assert result.returncode == 0
     assert EXPECTED in result.stdout

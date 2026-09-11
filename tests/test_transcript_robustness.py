@@ -75,6 +75,7 @@ def test_cli_reports_friendly_error_for_corrupted_transcript(tmp_path):
         capture_output=True,
         text=True,
         timeout=60,
+        check=False,
     )
     assert result.returncode == 1
     combined = result.stdout + result.stderr
