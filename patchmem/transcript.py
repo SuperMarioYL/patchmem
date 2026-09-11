@@ -77,11 +77,19 @@ def _iter_jsonl(path: Path) -> Iterator[dict[str, Any]]:
             if not line:
                 continue
             try:
-                yield json.loads(line)
+                obj = json.loads(line)
             except json.JSONDecodeError as exc:
                 raise TranscriptError(
                     f"{path}:{lineno}: invalid JSON ({exc.msg})"
                 ) from exc
+            if not isinstance(obj, dict):
+                # A line that parses as a bare string/number is corruption
+                # (or an unknown writer) — fail loud with file:lineno like
+                # the invalid-JSON path, never with an AttributeError.
+                raise TranscriptError(
+                    f"{path}:{lineno}: line is not a JSON object"
+                )
+            yield obj
 
 
 def _content_blocks(message: dict[str, Any]) -> tuple[list[TextBlock], list[ToolUse]]:
