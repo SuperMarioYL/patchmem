@@ -34,6 +34,15 @@ CONFIG_PATH = PATCHMEM_HOME / "config.toml"
 DEFAULT_RUNTIME = "claude-code"
 
 
+class ConfigError(RuntimeError):
+    """Raised when the operator's config file cannot be parsed or validated.
+
+    Fail-loud on purpose: a mistyped ``projects_dir`` would otherwise make
+    every command silently inspect the WRONG sessions, which for a
+    transcript-inspection tool is worse than a crash.
+    """
+
+
 @dataclass
 class RuntimeAdapter:
     """A declarative runtime adapter — v0.1 ships the shape, m2 fills spawn."""
@@ -102,8 +111,20 @@ def load_config(path: Path | None = None) -> Config:
     cfg_path = Path(path) if path else CONFIG_PATH
     toml: dict = {}
     if cfg_path.exists():
-        with cfg_path.open("rb") as fh:
-            toml = tomllib.load(fh)
+        try:
+            with cfg_path.open("rb") as fh:
+                toml = tomllib.load(fh)
+        except tomllib.TOMLDecodeError as exc:
+            raise ConfigError(f"invalid TOML in {cfg_path}: {exc}") from exc
+
+    # A mistyped (non-string) path/runtime value must fail loud, not coerce
+    # into a garbage default or a raw TypeError deep inside Path().
+    for key in ("runtime", "projects_dir", "runs_dir"):
+        if key in toml and not isinstance(toml[key], str):
+            raise ConfigError(
+                f"invalid {key!r} in {cfg_path}: expected a string, "
+                f"got {type(toml[key]).__name__}"
+            )
 
     runtime = runtime or str(toml.get("runtime", DEFAULT_RUNTIME))
     projects_dir = Path(projects_dir_env) if projects_dir_env else Path(

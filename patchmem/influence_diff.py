@@ -130,6 +130,11 @@ def diff_from_transcripts(
                 obj = json.loads(line)
             except json.JSONDecodeError:
                 continue
+            if not isinstance(obj, dict):
+                # Same corrupt-line contract as the CLI arm parser: a line
+                # that is valid JSON but not an object is skipped, not a
+                # crash.
+                continue
             if obj.get("type") != "assistant":
                 continue
             msg = obj.get("message")

@@ -23,7 +23,7 @@ import typer
 from rich.console import Console
 
 from . import __version__
-from .config import load_config
+from .config import ConfigError, load_config
 from .patch import PatchError, author_patch, read_patch_md, write_patch_md
 from .transcript import TranscriptError, find_session, parse_session
 from .wm_view import view_session
@@ -54,7 +54,7 @@ def view(session: str = typer.Argument(..., help="Session id / prefix / path."))
     """m1 — render the parentUuid-linked decision tree + working memory."""
     try:
         _cfg, path, messages = _resolve(session)
-    except (TranscriptError, FileNotFoundError) as exc:
+    except (TranscriptError, FileNotFoundError, ConfigError) as exc:
         err_console.print(f"[red]error:[/red] {exc}")
         raise typer.Exit(code=1)
     if not messages:
@@ -79,7 +79,7 @@ def edit(
     """m1 — open $EDITOR, author a working-memory patch, write patch.md."""
     try:
         _cfg, path, messages = _resolve(session)
-    except (TranscriptError, FileNotFoundError) as exc:
+    except (TranscriptError, FileNotFoundError, ConfigError) as exc:
         err_console.print(f"[red]error:[/red] {exc}")
         raise typer.Exit(code=1)
     if not messages:
@@ -117,7 +117,7 @@ def resume(
 
     try:
         cfg, path, messages = _resolve(session)
-    except (TranscriptError, FileNotFoundError) as exc:
+    except (TranscriptError, FileNotFoundError, ConfigError) as exc:
         err_console.print(f"[red]error:[/red] {exc}")
         raise typer.Exit(code=1)
     try:
@@ -157,7 +157,7 @@ def diff(
 
     try:
         cfg, path, messages = _resolve(session)
-    except (TranscriptError, FileNotFoundError) as exc:
+    except (TranscriptError, FileNotFoundError, ConfigError) as exc:
         err_console.print(f"[red]error:[/red] {exc}")
         raise typer.Exit(code=1)
     sid = _session_id_from_path(path)
@@ -185,13 +185,20 @@ def diff(
 
     def _decisions(p: Path) -> list[ToolUse]:
         out: list[ToolUse] = []
-        for line in p.read_text(encoding="utf-8").splitlines():
+        # errors="replace": one stray invalid byte degrades that line's text
+        # instead of UnicodeDecodeError-crashing the whole diff.
+        for line in p.read_text(encoding="utf-8", errors="replace").splitlines():
             line = line.strip()
             if not line:
                 continue
             try:
                 obj = json.loads(line)
             except json.JSONDecodeError:
+                continue
+            if not isinstance(obj, dict):
+                # Replay arms are runtime-produced suffixes; like the
+                # JSONDecodeError skip above, corrupt lines are skipped and
+                # the diff is computed from the decisions that parsed.
                 continue
             if obj.get("type") != "assistant":
                 continue
@@ -209,12 +216,28 @@ def diff(
                     )
         return out
 
-    patch_obj = (
-        read_patch_md(patch_meta_path) if patch_meta_path.exists() else Patch(
-            anchor_uuid="", block=TextBlock(text=""),
+    if patch_meta_path.exists():
+        try:
+            patch_obj = read_patch_md(patch_meta_path)
+        except PatchError as exc:
+            # The diff's data comes from the two arm files; this file is a
+            # display header. A malformed header warns instead of killing
+            # the whole influence diff.
+            err_console.print(
+                f"[yellow]warning:[/yellow] patch metadata unreadable ({exc}); "
+                "rendering diff without it."
+            )
+            patch_obj = Patch(
+                anchor_uuid="",
+                block=TextBlock(text=""),
+                rationale="(patch metadata unavailable)",
+            )
+    else:
+        patch_obj = Patch(
+            anchor_uuid="",
+            block=TextBlock(text=""),
             rationale="(patch metadata unavailable)",
         )
-    )
     influence = compute_diff(
         patch_obj, _decisions(control_path), _decisions(patched_path)
     )

@@ -129,27 +129,32 @@ def parse_session(path: str | Path) -> list[Message]:
     if not path.exists():
         raise TranscriptError(f"session file not found: {path}")
     messages: list[Message] = []
-    for obj in _iter_jsonl(path):
-        mtype = obj.get("type")
-        # Only user / assistant carry the message + content blocks we diff.
-        if mtype not in ("user", "assistant"):
-            continue
-        msg = obj.get("message")
-        if not isinstance(msg, dict):
-            continue
-        texts, tools = _content_blocks(msg)
-        messages.append(
-            Message(
-                uuid=obj.get("uuid", ""),
-                parent_uuid=obj.get("parentUuid"),
-                type=mtype,
-                timestamp=obj.get("timestamp", ""),
-                role=msg.get("role"),
-                text_blocks=texts,
-                tool_uses=tools,
-                raw=obj,
+    try:
+        for obj in _iter_jsonl(path):
+            mtype = obj.get("type")
+            # Only user / assistant carry the message + content blocks we diff.
+            if mtype not in ("user", "assistant"):
+                continue
+            msg = obj.get("message")
+            if not isinstance(msg, dict):
+                continue
+            texts, tools = _content_blocks(msg)
+            messages.append(
+                Message(
+                    uuid=obj.get("uuid", ""),
+                    parent_uuid=obj.get("parentUuid"),
+                    type=mtype,
+                    timestamp=obj.get("timestamp", ""),
+                    role=msg.get("role"),
+                    text_blocks=texts,
+                    tool_uses=tools,
+                    raw=obj,
+                )
             )
-        )
+    except UnicodeDecodeError as exc:
+        # The transcript is the operator's source of truth: one bad byte
+        # fails loud with the path, it never silently replaces or crashes.
+        raise TranscriptError(f"{path}: transcript is not valid UTF-8 ({exc})") from exc
     return messages
 
 
