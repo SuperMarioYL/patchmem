@@ -136,20 +136,34 @@ def resume(
         run_resume(path, _session_id_from_path(path), patch_obj, cfg, patch)
     except RunnerStub as exc:
         console.print(f"[yellow]m2 stub:[/yellow] {exc}")
-        raise typer.Exit(code=0)
+        # Nothing was resumed or written; exit non-zero so a caller cannot
+        # mistake the stub for a completed replay.
+        raise typer.Exit(code=1)
 
 
 @app.command()
 def diff(
     session: str = typer.Argument(..., help="Session id / prefix / path."),
     hosted: bool = typer.Option(False, "--hosted", help="v0.3 managed replay-farm stub."),
+    control: Path = typer.Option(
+        None,
+        "--control",
+        help="Explicit control-arm JSONL (use together with --patched).",
+    ),
+    patched: Path = typer.Option(
+        None,
+        "--patched",
+        help="Explicit patched-arm JSONL (use together with --control).",
+    ),
+    patch_md: Path = typer.Option(
+        None, "--patch-md", help="Patch metadata for the diff header."
+    ),
 ) -> None:
     """m3 — print the before/after influence tree.
 
-    In v0.1, runs the real ``influence_diff`` primitive if m2's two-arm
-    replay output exists under ``~/.patchmem/runs/<session>/``. Otherwise
-    explains m2 must run first. The diff algorithm itself is implemented
-    (it is the owned primitive) — only the replay that feeds it is m2.
+    Runs the real ``influence_diff`` primitive over two replayed arms: by
+    default under ``~/.patchmem/runs/<session>/``, or over an explicit
+    ``--control`` / ``--patched`` file pair from an external replay.
     """
     from .influence_diff import compute_diff
     from .render_diff import render_diff
@@ -161,27 +175,53 @@ def diff(
         err_console.print(f"[red]error:[/red] {exc}")
         raise typer.Exit(code=1)
     sid = _session_id_from_path(path)
-    control_path = cfg.runs_dir / sid / "control.jsonl"
-    patched_path = cfg.runs_dir / sid / "patched.jsonl"
-    patch_meta_path = cfg.runs_dir / sid / "patch.md"
 
     if hosted:
         console.print(
             "[magenta]--hosted[/magenta]: managed replay-farm diff (v0.3 paid tier). "
             "Same primitive, compute off your laptop. [italic]stub in v0.1.[/italic]"
         )
-        raise typer.Exit(code=0)
+        # The hosted stub returns no diff; do not report success.
+        raise typer.Exit(code=1)
 
-    if not (control_path.exists() and patched_path.exists()):
-        console.print(
-            f"[yellow]m2 not yet run[/yellow] — no replayed arms at\n"
-            f"  {control_path}\n  {patched_path}\n"
-            f"run [bold]patchmem resume {sid} --patch patch.md[/bold] first "
-            "(m2 — stub in v0.1).\n\n"
-            "[dim]the influence-diff primitive itself is implemented "
-            "(influence_diff.py); it needs two replayed transcripts.[/dim]"
+    explicit_arms = control is not None or patched is not None
+    if explicit_arms:
+        if control is None or patched is None:
+            err_console.print(
+                "[red]error:[/red] --control and --patched must be given together."
+            )
+            raise typer.Exit(code=1)
+        missing = [str(p) for p in (control, patched) if not p.exists()]
+        if missing:
+            err_console.print(
+                "[red]error:[/red] arm file not found: " + ", ".join(missing)
+            )
+            raise typer.Exit(code=1)
+        if patch_md is not None and not patch_md.exists():
+            err_console.print(
+                f"[red]error:[/red] patch metadata file not found: {patch_md}"
+            )
+            raise typer.Exit(code=1)
+        control_path, patched_path = control, patched
+        patch_meta_path = patch_md
+    else:
+        control_path = cfg.runs_dir / sid / "control.jsonl"
+        patched_path = cfg.runs_dir / sid / "patched.jsonl"
+        patch_meta_path = (
+            patch_md if patch_md is not None else cfg.runs_dir / sid / "patch.md"
         )
-        raise typer.Exit(code=0)
+        if not (control_path.exists() and patched_path.exists()):
+            console.print(
+                f"[yellow]m2 not yet run[/yellow] — no replayed arms at\n"
+                f"  {control_path}\n  {patched_path}\n"
+                f"run [bold]patchmem resume {sid} --patch patch.md[/bold] first "
+                "(m2 — stub in v0.1), or pass an explicit "
+                "[bold]--control[/bold] / [bold]--patched[/bold] pair.\n\n"
+                "[dim]the influence-diff primitive itself is implemented "
+                "(influence_diff.py); it needs two replayed transcripts.[/dim]"
+            )
+            # No diff was produced; exit non-zero.
+            raise typer.Exit(code=1)
 
     def _decisions(p: Path) -> list[ToolUse]:
         out: list[ToolUse] = []
@@ -216,7 +256,25 @@ def diff(
                     )
         return out
 
-    if patch_meta_path.exists():
+    control_decisions = _decisions(control_path)
+    patched_decisions = _decisions(patched_path)
+    if not control_decisions and not patched_decisions:
+        # Empty/wholly corrupt arms are missing evidence, not evidence that
+        # the patch did nothing. Rendering "patch was inert" here would turn
+        # a replay failure into a false structural verdict.
+        err_console.print(
+            "[red]error:[/red] no tool_use decisions in either arm — "
+            f"refusing to report an inert patch from empty evidence\n"
+            f"  control: {control_path}\n  patched: {patched_path}"
+        )
+        raise typer.Exit(code=1)
+
+    patch_obj = Patch(
+        anchor_uuid="",
+        block=TextBlock(text=""),
+        rationale="(patch metadata unavailable)",
+    )
+    if patch_meta_path is not None and patch_meta_path.exists():
         try:
             patch_obj = read_patch_md(patch_meta_path)
         except PatchError as exc:
@@ -227,20 +285,7 @@ def diff(
                 f"[yellow]warning:[/yellow] patch metadata unreadable ({exc}); "
                 "rendering diff without it."
             )
-            patch_obj = Patch(
-                anchor_uuid="",
-                block=TextBlock(text=""),
-                rationale="(patch metadata unavailable)",
-            )
-    else:
-        patch_obj = Patch(
-            anchor_uuid="",
-            block=TextBlock(text=""),
-            rationale="(patch metadata unavailable)",
-        )
-    influence = compute_diff(
-        patch_obj, _decisions(control_path), _decisions(patched_path)
-    )
+    influence = compute_diff(patch_obj, control_decisions, patched_decisions)
     render_diff(influence, console)
 
 

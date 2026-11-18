@@ -11,7 +11,8 @@
   "meta": {
     "visual_style": "neon-particle",
     "demo_source": "docs/demo-results.json",
-    "content_version": "0.3.0"
+    "content_version": "0.4.0",
+    "generated_at": "2026-11-19"
   },
   "hero": {
     "headline": {
@@ -51,8 +52,8 @@
         "zh": "本地检查"
       },
       "body": {
-        "en": "View and diff can use saved data without a model.",
-        "zh": "view 与 diff 可使用保存数据，无需模型。"
+        "en": "View and diff can use saved data without a model; diff also accepts an explicit control/patched arm pair.",
+        "zh": "view 与 diff 可使用保存数据，无需模型；diff 也可直接读取显式的 control/patched arm 文件对。"
       }
     }
   ],
@@ -221,7 +222,7 @@
           "en": "The CLI exposes the following operations. Commands after the example use your own paths or identifiers.",
           "zh": "CLI 提供以下操作。示例之外的命令需要替换成你的文件路径或标识。"
         },
-        "code": "patchmem view tests/fixtures/sample_session.jsonl\n# Interactive authoring opens your editor:\npatchmem edit tests/fixtures/sample_session.jsonl --anchor msg-0006 --out patch.md"
+        "code": "patchmem view tests/fixtures/sample_session.jsonl\n# Interactive authoring opens your editor:\npatchmem edit tests/fixtures/sample_session.jsonl --anchor msg-0006 --out patch.md\n# Diff an explicit control/patched pair from your own replay:\npatchmem diff tests/fixtures/sample_session.jsonl --control control.jsonl --patched patched.jsonl"
       }
     ]
   }

@@ -116,7 +116,11 @@ The CLI exposes the following operations. Commands after the example use your ow
 patchmem view tests/fixtures/sample_session.jsonl
 # Interactive authoring opens your editor:
 patchmem edit tests/fixtures/sample_session.jsonl --anchor msg-0006 --out patch.md
+# Diff an explicit control/patched pair produced by your own replay:
+patchmem diff tests/fixtures/sample_session.jsonl --control control.jsonl --patched patched.jsonl
 ```
+
+When you already have replay output, compare the two arms directly with `--control` / `--patched` (optionally `--patch-md` for the header) instead of placing files under `~/.patchmem/runs/<session>/`.
 
 ## Configuration
 

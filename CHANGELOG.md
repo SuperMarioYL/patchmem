@@ -4,6 +4,37 @@ All notable changes to PatchMem are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to semantic versioning.
 
+## [0.4.0] - 2026-11-19
+
+### Added
+
+- `patchmem diff --control <control.jsonl> --patched <patched.jsonl>` (with
+  optional `--patch-md`) diffs an explicit arm pair, so a replay produced
+  outside PatchMem can feed the structural decision diff without hand-placing
+  files under `~/.patchmem/runs/<session>/`.
+
+### Fixed
+
+- A non-UTF-8 `patch.md` (for example, one saved by a GBK/GB18030 editor) now
+  raises a clean `PatchError`: `patchmem diff` warns and renders without the
+  header, and `patchmem resume` prints a one-line error instead of a raw
+  `UnicodeDecodeError` traceback (`patchmem/patch.py`).
+- `patchmem diff` no longer reports "patch was inert" when both arms produced
+  zero tool_use decisions. Empty or wholly corrupt arm files are an error
+  (exit 1), not evidence that the patch changed nothing (`patchmem/cli.py`).
+- `patchmem resume` (m2 stub), `patchmem diff` with missing arms, and both
+  `--hosted` stubs now exit non-zero; exit 0 is reserved for a command that
+  produced its documented output (`patchmem/cli.py`).
+- `patchmem view` renders sessions longer than Python's recursion limit — a
+  linear 1500-message transcript no longer raises `RecursionError`
+  (`patchmem/wm_view.py`).
+
+### Changed
+
+- Version lockstep: `VERSION`, `pyproject.toml`, `patchmem.__version__`, the
+  CLI `--version` output, and `web/site.json` `meta.content_version` all
+  report 0.4.0 (`tests/test_version_lockstep.py`).
+
 ## [0.2.0] - 2026-09-11
 
 ### Fixed
@@ -75,5 +106,6 @@ Initial release.
   CLI `--version` output, and `web/site.json` `meta.content_version` all
   report 0.3.0 (`tests/test_version_lockstep.py`).
 
+[0.4.0]: https://github.com/SuperMarioYL/patchmem/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/SuperMarioYL/patchmem/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/SuperMarioYL/patchmem/compare/v0.1.0...v0.2.0

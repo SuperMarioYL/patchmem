@@ -47,21 +47,35 @@ def render_decision_tree(messages: list[Message], console: Console | None = None
     tree_map = build_tree(messages)
     uuid_to_msg = {m.uuid: m for m in messages}
 
-    def add_children(node, parent_uuid: str | None) -> None:
-        for child in tree_map.get(parent_uuid, []):
-            label = Text.assemble(
+    def label(child: Message, *, timestamp: bool = True) -> Text:
+        if not timestamp:
+            return Text.assemble(
                 (f"{child.type:<9} ", "bold"),
-                (f"{child.uuid[:8]}  ", "dim"),
-                (child.timestamp[:19], "green"),
+                (f"{child.uuid[:8]}", "dim"),
                 "  ",
                 _decision_summary(child),
             )
-            branch = node.add(label)
-            add_children(branch, child.uuid)
+        return Text.assemble(
+            (f"{child.type:<9} ", "bold"),
+            (f"{child.uuid[:8]}  ", "dim"),
+            (child.timestamp[:19], "green"),
+            "  ",
+            _decision_summary(child),
+        )
 
     root = Tree("session", guide_style="dim cyan")
-    # Attach any orphan (parent not in set) under root too.
-    add_children(root, None)
+    # Iterative DFS: one recursive call per parentUuid edge would hit Python's
+    # recursion limit on long sessions (~1000+ messages). Children are added
+    # in transcript order; their subtrees are pushed in reverse so the
+    # pre-order traversal matches the recursive version.
+    stack: list[tuple[Tree, str | None]] = [(root, None)]
+    while stack:
+        node, parent_uuid = stack.pop()
+        pending: list[tuple[Tree, str]] = []
+        for child in tree_map.get(parent_uuid, []):
+            pending.append((node.add(label(child)), child.uuid))
+        stack.extend(reversed(pending))
+
     # Orphans whose parent is missing — surface them so the operator sees gaps.
     known = set(uuid_to_msg) | {None}
     for parent_uuid, kids in tree_map.items():
@@ -69,14 +83,7 @@ def render_decision_tree(messages: list[Message], console: Console | None = None
             continue
         orphan_branch = root.add(Text(f"(broken parent {str(parent_uuid)[:8]})", "yellow"))
         for child in kids:
-            orphan_branch.add(
-                Text.assemble(
-                    (f"{child.type:<9} ", "bold"),
-                    (child.uuid[:8], "dim"),
-                    "  ",
-                    _decision_summary(child),
-                )
-            )
+            orphan_branch.add(label(child, timestamp=False))
     return root
 
 

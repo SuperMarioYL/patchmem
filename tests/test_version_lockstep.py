@@ -25,7 +25,7 @@ import pytest
 import patchmem
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = "0.3.0"
+EXPECTED = "0.4.0"
 
 
 def test_version_file():
@@ -47,6 +47,7 @@ def test_changelog_has_both_release_sections():
     assert "[0.1.0]" in changelog
     assert "[0.2.0]" in changelog
     assert "[0.3.0]" in changelog
+    assert "[0.4.0]" in changelog
 
 
 def test_cli_dash_version_reports_expected():

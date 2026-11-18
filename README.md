@@ -116,7 +116,11 @@ CLI 提供以下操作。示例之外的命令需要替换成你的文件路径�
 patchmem view tests/fixtures/sample_session.jsonl
 # Interactive authoring opens your editor:
 patchmem edit tests/fixtures/sample_session.jsonl --anchor msg-0006 --out patch.md
+# Diff an explicit control/patched pair produced by your own replay:
+patchmem diff tests/fixtures/sample_session.jsonl --control control.jsonl --patched patched.jsonl
 ```
+
+已有外部回放结果时，用 `--control` / `--patched` 直接比较两个 arm（可加 `--patch-md` 显示补丁头），无需把文件放进 `~/.patchmem/runs/<session>/`。
 
 ## 配置
 

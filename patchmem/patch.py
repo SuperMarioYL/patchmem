@@ -233,7 +233,16 @@ def read_patch_md(path: str | Path) -> Patch:
     path = Path(path)
     if not path.exists():
         raise PatchError(f"patch file not found: {path}")
-    text = path.read_text(encoding="utf-8")
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        # Operator-authored patch files are commonly saved by editors in the
+        # local legacy encoding (GBK/GB18030 etc.). Report that as a malformed
+        # patch, not a raw traceback, so the CLI's clean-error contract holds.
+        raise PatchError(
+            f"patch {path} is not valid UTF-8 "
+            f"(byte 0x{exc.object[exc.start]:02x} at offset {exc.start})"
+        ) from exc
     # split on the FIRST line that is exactly '---' — header before, body after.
     lines = text.splitlines()
     sep_idx = next(
