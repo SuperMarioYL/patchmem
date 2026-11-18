@@ -62,6 +62,11 @@ def _sandbox(tmp_path: Path) -> tuple[Path, Path]:
     return home, runs
 
 
+def _flat(text: str) -> str:
+    """Collapse rich's terminal-width line wrapping before phrase assertions."""
+    return " ".join(text.split())
+
+
 def _run_cli(args: list[str], home: Path) -> subprocess.CompletedProcess[str]:
     env = {**os.environ, "HOME": str(home)}
     return subprocess.run(
@@ -173,7 +178,7 @@ def test_diff_warns_and_renders_on_malformed_patch_meta(tmp_path):
     result = _run_cli(["diff", SID], home)
     assert result.returncode == 0
     assert "warning:" in result.stderr
-    assert "patch metadata unreadable" in result.stderr
+    assert "patch metadata unreadable" in _flat(result.stderr)
     assert "influence-diff" in result.stdout
     assert "PatchError" not in result.stdout + result.stderr
 
@@ -210,7 +215,7 @@ def test_invalid_utf8_transcript_reports_clean_cli_error(tmp_path):
     result = _run_cli(["view", "bad-utf8"], home)
     assert result.returncode == 1
     assert "error:" in result.stderr
-    assert "not valid UTF-8" in result.stderr
+    assert "not valid UTF-8" in _flat(result.stderr)
     assert "UnicodeDecodeError" not in result.stdout + result.stderr
 
 
@@ -238,7 +243,7 @@ def test_diff_warns_and_renders_on_non_utf8_patch_meta(tmp_path):
     result = _run_cli(["diff", SID], home)
     assert result.returncode == 0
     assert "warning:" in result.stderr
-    assert "patch metadata unreadable" in result.stderr
+    assert "patch metadata unreadable" in _flat(result.stderr)
     assert "influence-diff" in result.stdout
     assert "UnicodeDecodeError" not in result.stdout + result.stderr
 
@@ -250,7 +255,7 @@ def test_resume_rejects_non_utf8_patch_cleanly(tmp_path):
     result = _run_cli(["resume", SID, "--patch", str(bad)], home)
     assert result.returncode == 1
     assert "error:" in result.stderr
-    assert "not valid UTF-8" in result.stderr
+    assert "not valid UTF-8" in _flat(result.stderr)
     assert "UnicodeDecodeError" not in result.stdout + result.stderr
 
 
@@ -264,7 +269,7 @@ def test_diff_refuses_inert_verdict_on_empty_arms(tmp_path):
     result = _run_cli(["diff", SID], home)
     assert result.returncode == 1
     assert "error:" in result.stderr
-    assert "no tool_use decisions" in result.stderr
+    assert "no tool_use decisions" in _flat(result.stderr)
     assert "patch was inert" not in result.stdout
 
 
@@ -275,7 +280,7 @@ def test_diff_refuses_inert_verdict_when_both_arms_are_corrupt(tmp_path):
     (runs / "patched.jsonl").write_text(garbage, encoding="utf-8")
     result = _run_cli(["diff", SID], home)
     assert result.returncode == 1
-    assert "no tool_use decisions" in result.stderr
+    assert "no tool_use decisions" in _flat(result.stderr)
     assert "patch was inert" not in result.stdout
 
 
@@ -302,7 +307,7 @@ def test_resume_stub_exits_nonzero(tmp_path):
     _valid_patch(patch)
     result = _run_cli(["resume", SID, "--patch", str(patch)], home)
     assert result.returncode == 1
-    assert "m2 stub" in result.stdout
+    assert "m2 stub" in _flat(result.stdout)
 
 
 def test_diff_missing_arms_exits_nonzero(tmp_path):
@@ -310,7 +315,7 @@ def test_diff_missing_arms_exits_nonzero(tmp_path):
     shutil.rmtree(runs)
     result = _run_cli(["diff", SID], home)
     assert result.returncode == 1
-    assert "m2 not yet run" in result.stdout
+    assert "m2 not yet run" in _flat(result.stdout)
 
 
 def test_diff_hosted_stub_exits_nonzero(tmp_path):
@@ -362,7 +367,7 @@ def test_diff_explicit_arms_require_both(tmp_path):
     control.write_text(_arm_line("m1", "tool-1", "a.yaml") + "\n", encoding="utf-8")
     result = _run_cli(["diff", SID, "--control", str(control)], home)
     assert result.returncode == 1
-    assert "must be given together" in result.stderr
+    assert "must be given together" in _flat(result.stderr)
 
 
 def test_diff_explicit_arm_missing_file(tmp_path):
@@ -374,8 +379,9 @@ def test_diff_explicit_arm_missing_file(tmp_path):
         ["diff", SID, "--control", str(missing), "--patched", str(patched)], home
     )
     assert result.returncode == 1
-    assert "arm file not found" in result.stderr
-    assert "nope.jsonl" in result.stderr
+    assert "arm file not found" in _flat(result.stderr)
+    # rich may wrap a long path mid-token; strip all whitespace to find it.
+    assert "nope.jsonl" in "".join(result.stderr.split())
 
 
 def test_diff_explicit_patch_md_renders_header(tmp_path):
@@ -403,4 +409,4 @@ def test_diff_explicit_patch_md_renders_header(tmp_path):
         home,
     )
     assert result.returncode == 0
-    assert "explicit arms note" in result.stdout
+    assert "explicit arms note" in _flat(result.stdout)
